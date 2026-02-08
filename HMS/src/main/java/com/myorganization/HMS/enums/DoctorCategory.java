@@ -1,0 +1,14 @@
+package com.myorganization.HMS.enums;
+
+public enum DoctorCategory {
+    GENERAL_PHYSICIAN,
+    NEUROLOGIST,
+    CARDIOLOGIST,
+    DENTIST,
+    ENT_SPECIALIST,
+    GASTROENTEROLOGIST,
+    GYNECOLOGIST,
+    ONCOLOGIST, RADIOLOGIST,
+    PATHOLOGIST,
+    EMERGENCY_DOCTOR
+}
