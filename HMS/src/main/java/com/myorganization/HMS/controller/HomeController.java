@@ -1,5 +1,6 @@
 package com.myorganization.HMS.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,10 +9,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/")
-public class ServerController {
+public class HomeController {
+
+    private final String applicationName;
+
+    public HomeController(@Value("${spring.application.name}") String applicationName) {
+        this.applicationName = applicationName;
+    }
+
     @GetMapping
-    public ResponseEntity<String> serverStatus() {
-        return new ResponseEntity<>("HMS is Live", HttpStatusCode.valueOf(200));
-    
+    public ResponseEntity<String> homeApi() {
+        return new ResponseEntity<>("Welcome to " + applicationName, HttpStatusCode.valueOf(200));
     }
 }
