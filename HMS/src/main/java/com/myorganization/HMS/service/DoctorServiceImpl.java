@@ -81,6 +81,7 @@ public class DoctorServiceImpl implements DoctorService{
         String message = "Doctor name: "+name+" has been removed successfully";
         genericResponseDto.setSuccess(true);
         genericResponseDto.setMessage(message);
+        genericResponseDto.setDetails(null);
 
         return genericResponseDto;
     }
