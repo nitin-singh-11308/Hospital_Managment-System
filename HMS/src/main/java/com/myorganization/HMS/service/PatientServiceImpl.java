@@ -3,6 +3,7 @@ package com.myorganization.HMS.service;
 import com.myorganization.HMS.dto.request.PatientRequestDto;
 import com.myorganization.HMS.dto.response.GenericResponseDto;
 import com.myorganization.HMS.dto.response.PatientResponseDto;
+import com.myorganization.HMS.exception.PatientNotFoundException;
 import com.myorganization.HMS.model.Doctor;
 import com.myorganization.HMS.model.Patient;
 import com.myorganization.HMS.repository.DoctorRepository;
@@ -27,7 +28,7 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = new Patient();
         patient = mapPatientRequestDtoToPatient(patient, patientRequestDto);
 
-        Doctor doctor = doctorRepository.findById(patientRequestDto.getDoctorId()).orElse(null);
+        Doctor doctor = doctorRepository.findById(patientRequestDto.getDoctorId()).orElseThrow(()-> new PatientNotFoundException("Patient not found"));
         patient.setDoctor(doctor);
 
         patientRepository.save(patient);
@@ -37,7 +38,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponseDto getPatient(Long id) {
-        Patient patient = patientRepository.findById(id).orElse(null);
+        Patient patient = patientRepository.findById(id).orElseThrow(()-> new PatientNotFoundException("Patient id: "+id+" not found"));
 
         return mapPatientToPatientResponseDto(patient);
     }
@@ -48,6 +49,10 @@ public class PatientServiceImpl implements PatientService {
 
         List<PatientResponseDto> patientResponseDtoList = new ArrayList<>();
 
+        if (patientList.isEmpty()) {
+            throw new PatientNotFoundException("Patient list is empty");
+        }
+
         for (Patient patient : patientList) {
             patientResponseDtoList.add(mapPatientToPatientResponseDto(patient));
         }
@@ -56,7 +61,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponseDto updatePatient(Long id, PatientRequestDto patientRequestDto) {
-        Patient patient = patientRepository.findById(id).orElse(null);
+        Patient patient = patientRepository.findById(id).orElseThrow(()-> new PatientNotFoundException("Patient id: "+id+" not exist"));
 
         patient = mapPatientRequestDtoToPatient(patient, patientRequestDto);
 
@@ -67,24 +72,17 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public GenericResponseDto removePatient(Long id) {
-        Patient patient = patientRepository.findById(id).orElse(null);
+        Patient patient = patientRepository.findById(id).orElseThrow(()-> new PatientNotFoundException("Patient id: "+id+" not exist"));
 
         GenericResponseDto genericResponseDto = new GenericResponseDto();
 
-        if (patient != null) {
-            String name = patient.getName();
-
             patientRepository.deleteById(id);
 
+            String name = patient.getName();
+            String message = "Patient name: "+name+" has been removed successfully";
             genericResponseDto.setSuccess(true);
-            genericResponseDto.setMessage("Patient (" +id+ ") :" +name+ " has been remove successfully.");
-
-            return genericResponseDto;
-        }else {
-            genericResponseDto.setSuccess(false);
-            genericResponseDto.setMessage("Patient ("+id+") Not Found.");
-        }
-
+            genericResponseDto.setMessage(message);
+            genericResponseDto.setDetails(null);
         return genericResponseDto;
     }
 
