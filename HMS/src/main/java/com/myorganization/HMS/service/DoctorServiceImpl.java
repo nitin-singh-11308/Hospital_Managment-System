@@ -3,6 +3,7 @@ package com.myorganization.HMS.service;
 import com.myorganization.HMS.dto.request.DoctorRequestDto;
 import com.myorganization.HMS.dto.response.DoctorResponseDto;
 import com.myorganization.HMS.dto.response.GenericResponseDto;
+import com.myorganization.HMS.exception.DoctorNotFoundException;
 import com.myorganization.HMS.model.Doctor;
 import com.myorganization.HMS.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class DoctorServiceImpl implements DoctorService{
     @Override
     public DoctorResponseDto getDoctor(Long id) {
 
-        Doctor doctor = doctorRepository.findById(id).orElse(null);
+        Doctor doctor = doctorRepository.findById(id).orElseThrow( () -> new DoctorNotFoundException("Doctor id: "+id+" Not Found"));
 
         return mapDoctorToDoctorResponseDto(doctor);
     }
@@ -46,6 +47,10 @@ public class DoctorServiceImpl implements DoctorService{
 
         List<DoctorResponseDto> doctorResponseDtoList = new ArrayList<>();
 
+        if (doctorList.isEmpty()) {
+            throw new DoctorNotFoundException("Doctor list is empty");
+        }
+
         for (Doctor doctor : doctorList) {
             doctorResponseDtoList.add(mapDoctorToDoctorResponseDto(doctor));
         }
@@ -55,7 +60,7 @@ public class DoctorServiceImpl implements DoctorService{
 
     @Override
     public DoctorResponseDto updateDoctor(Long id, DoctorRequestDto doctorRequestDto) {
-        Doctor doctor = doctorRepository.findById(id).orElse(null);
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(()-> new DoctorNotFoundException("Doctor id: "+id+" not exist"));
 
         doctor = mapDoctorRequestDtoToDoctor(doctor, doctorRequestDto);
 
@@ -66,27 +71,18 @@ public class DoctorServiceImpl implements DoctorService{
 
     @Override
     public GenericResponseDto deleteDoctor(Long id) {
-        Doctor doctor = doctorRepository.findById(id).orElse(null);
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(()-> new DoctorNotFoundException("Doctor id: "+id+" not exist"));
 
         GenericResponseDto genericResponseDto = new GenericResponseDto();
 
-        if (doctor != null) {
-            String name = doctor.getName();
+        doctorRepository.deleteById(id);
 
-            doctorRepository.deleteById(id);
+        String name = doctor.getName();
+        String message = "Doctor name: "+name+" has been removed successfully";
+        genericResponseDto.setSuccess(true);
+        genericResponseDto.setMessage(message);
 
-            genericResponseDto.setSuccess(true);
-            genericResponseDto.setMessage("Doctor ("+id+") : " +name+ " has been removed successfully." );
-
-            return genericResponseDto;
-        }
-        else {
-            genericResponseDto.setSuccess(false);
-            genericResponseDto.setMessage("Doctor (" +id+") Not found.");
-
-            return genericResponseDto;
-        }
-
+        return genericResponseDto;
     }
 
     @Override
